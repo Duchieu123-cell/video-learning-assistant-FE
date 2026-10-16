@@ -3,7 +3,6 @@ import { courseApi } from '../api/courseApi';
 import { authApi } from '../api/authApi';
 import { BookOpen } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 
 const CourseList = () => {
@@ -14,13 +13,11 @@ const CourseList = () => {
         queryKey: ['courses'],
         queryFn: courseApi.getCourses,
     });
-    const navigate = useNavigate();
 
     const handleLogout = async () => {
         await authApi.logout();
         useAuthStore.getState().actions.logout();
 
-        navigate('/', { replace: true });
     }
 
     if (isLoadingCourses) {

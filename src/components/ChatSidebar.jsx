@@ -61,17 +61,25 @@ const ChatSidebar = ({ courseId }) => {
             const reader = response.body.getReader();
             const decoder = new TextDecoder('utf-8');
             let buffer = '';
+            let number = 0;
 
             while (true) {
                 const { value, done } = await reader.read();
                 if (done) break;
 
-                buffer += decoder.decode(value, { stream: true });
+                console.groupCollapsed(`Debug SSE Data Chunk: ${++number}`);
 
+                buffer += decoder.decode(value, { stream: true });
+                console.log('Nội dung chunk:', buffer);
+                
                 // Chuẩn hóa ngắt dòng cho SSE (\r\n -> \n)
                 const parts = buffer.split('\n\n');
                 // Giữ lại phần chưa kết thúc dòng vào buffer để đợi chunk tiếp theo
                 buffer = parts.pop() || '';
+
+                console.log('Mảng các SSE:', parts);
+                console.log('Phần chưa kết thúc:', buffer);
+                console.groupEnd();
 
                 for (const part of parts) {
                     const lines = part.split('\n');
@@ -96,25 +104,25 @@ const ChatSidebar = ({ courseId }) => {
                                     return [
                                         ...prev.slice(0, lastIdx),
                                         {
-                                        ...lastMsg,
-                                        citations: packet.data,
+                                            ...lastMsg,
+                                            citations: packet.data,
                                         },
                                     ];
                                 });
                             } else if (packet.type === 'token') {
                                 // Cập nhật content: clone object mới để tránh double-invoke của React 18 Strict Mode
                                 setMessages((prev) => {
-                                if (prev.length === 0) return prev;
-                                const lastIdx = prev.length - 1;
-                                const lastMsg = prev[lastIdx];
+                                    if (prev.length === 0) return prev;
+                                    const lastIdx = prev.length - 1;
+                                    const lastMsg = prev[lastIdx];
 
-                                return [
-                                    ...prev.slice(0, lastIdx),
-                                    {
-                                    ...lastMsg,
-                                    content: (lastMsg.content || '') + packet.data,
-                                    },
-                                ];
+                                    return [
+                                        ...prev.slice(0, lastIdx),
+                                        {
+                                            ...lastMsg,
+                                            content: (lastMsg.content || '') + packet.data,
+                                        },
+                                    ];
                                 });
                             } else if (packet.type === 'done') {
                                 setIsStreaming(false);

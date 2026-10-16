@@ -10,11 +10,10 @@ function formatTimestamp(seconds) {
 
 const CitationBadge = ({ citations }) => {
     if (!citations || citations.length === 0) return null;
-    const seekVideo = usePlayerStore.getState().actions.seekVideo;
 
     const handleClick = (start_seconds) => {
         if (start_seconds !== null && start_seconds !== undefined) {
-            seekVideo(start_seconds);
+            usePlayerStore.getState().actions.seekVideo(start_seconds);
         }
     }
 
